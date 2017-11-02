@@ -4,10 +4,12 @@ import xml.etree.ElementTree as ET
 
 
 import arcpy
+arcpy.env.overwriteOutput = True
 
 
 def replica2mxd(gdb, mxd, replica):
-    """Adds feature classes to an already created MXD for the replica or enterprise geodatabase specified.
+    """Adds feature classes to an already created MXD for the replica or enterprise geodatabase specified. Temporarily
+    Creates a XML file in the target mxd directory.
         gdb(Text):
          full path to the geodatabase connection file containing the replica of interest
 
@@ -15,7 +17,7 @@ def replica2mxd(gdb, mxd, replica):
          full path to already created mxd to add replica feature classes to. Should have same name as replica.
 
         replica(Text):
-         full name including schema of replica of interest. Example: 'PCGDO.ZipcodeNP1' """
+         full name including schema of replica of interest. Example: 'SDE.ReplicaName' """
     replica_objs = arcpy.da.ListReplicas(gdb)
     feature_classes, replicas = [], []
     xml = os.path.dirname(mxd)+'\\replica.xml'
@@ -23,18 +25,27 @@ def replica2mxd(gdb, mxd, replica):
     for r in replica_objs:
         replicas.append(r.name)
     if replica in replicas:
-        arcpy.da.ExportReplicaSchema_management(gdb, xml, replica)
+        arcpy.ExportReplicaSchema_management(gdb, xml, replica)
         tree = ET.parse(xml)
-        root = tree.getroot()
-        for dataset in root[0][4][12][3]:
-            feature_classes.append(dataset.find('DatasetName').text)
+        for elem in tree.iter():
+            if elem.tag == "DatasetName":
+                feature_classes.append(elem.text)
     else:
         print "Replica '{0}' not found in {1}".format(replica, gdb)
 
-    mxd = arcpy.mapping.MapDocument(mxd)
-    df = mxd.activeDataFrame
+    mxdo = arcpy.mapping.MapDocument(mxd)
+    df = mxdo.activeDataFrame
     for fc in feature_classes:
-        layer = arcpy.mapping.Layer("{0}\\{1}".format(gdb,fc))
-        arcpy.mapping.AddLayer(df, layer, "TOP")
-
+        desc = arcpy.Describe("{0}\\{1}".format(gdb, fc))
+        if desc.dataType == u'Table':
+            tbl = arcpy.mapping.TableView("{0}\\{1}".format(gdb, fc))
+            arcpy.mapping.AddTableView(df, tbl)
+        elif desc.dataType == u'FeatureClass':
+            layer = arcpy.mapping.Layer("{0}\\{1}".format(gdb, fc))
+            arcpy.mapping.AddLayer(df, layer, "TOP")
+        else:
+            pass
+    mxdo.save()
     os.remove(xml)
+
+# replica2mxd()
