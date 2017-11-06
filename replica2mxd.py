@@ -1,4 +1,4 @@
-"""Creates MXD files from enterprise geodatabase replicas containing all feature classes and files. Use when re-creating
+"""Creates MXD files from enterprise geodatabase replicas containing all feature classes and tables. Use when re-creating
 replicas or for quickly checking replica contents."""
 import os
 import xml.etree.ElementTree as ET
@@ -13,10 +13,10 @@ def replica2mxd(gdb, mxd_dir, replica_list):
     specified. Temporarily creates a XML file in the target mxd directory.
 
         gdb(Text):
-         full path to the geodatabase connection file containing the replica of interest
+         Full path to the geodatabase connection file containing the replica of interest
 
         mxd_dir(Text):
-         full path to an existing directory where the replica MXD files will be created.
+         Full path to an existing directory where the replica MXD files will be created.
 
         replica_list(List OR Text):
          List containing fully qualified replica name(s) of interest. Example: 'SDE.ReplicaName'. Use value 'ALL' to
@@ -39,7 +39,20 @@ def replica2mxd(gdb, mxd_dir, replica_list):
 
 
 def convert2mxd(replica, replicas, mxd_dir, gdb):
+    """Copies template MXD and renames to replica name then converts replica in replica list to xml and parses datasets.
+    Cleans up target directory.
 
+        replica(Text):
+         Fully qualified replica name.
+
+        replicas(List):
+         List of fully qualified replica names as text.
+
+        mxd_dir(Text):
+         Full path to directory where MXD files will be saved.
+
+        gdb(Text):
+         Database connection file which contains the replicas of interest."""
     arcpy.env.overwriteOutput = True
     feature_classes = []
     mxd = '{0}\\{1}.mxd'.format(mxd_dir, replica.split('.')[-1])
