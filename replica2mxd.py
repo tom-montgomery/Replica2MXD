@@ -1,51 +1,77 @@
-"""Adds all feature classes contained in a specific replica to an already created mxd file."""
+"""Creates MXD files from enterprise geodatabase replicas containing all feature classes and files. Use when re-creating
+replicas or for quickly checking replica contents."""
 import os
 import xml.etree.ElementTree as ET
+import shutil
 
 
 import arcpy
-arcpy.env.overwriteOutput = True
 
 
-def replica2mxd(gdb, mxd, replica):
-    """Adds feature classes to an already created MXD for the replica or enterprise geodatabase specified. Temporarily
-    Creates a XML file in the target mxd directory.
+def replica2mxd(gdb, mxd_dir, replica_list):
+    """Adds replica feature classes and tables to a copy of a template MXD for the replica or enterprise geodatabase
+    specified. Temporarily creates a XML file in the target mxd directory.
+
         gdb(Text):
          full path to the geodatabase connection file containing the replica of interest
 
-        mxd(Text):
-         full path to already created mxd to add replica feature classes to. Should have same name as replica.
+        mxd_dir(Text):
+         full path to an existing directory where the replica MXD files will be created.
 
-        replica(Text):
-         full name including schema of replica of interest. Example: 'SDE.ReplicaName' """
-    replica_objs = arcpy.da.ListReplicas(gdb)
-    feature_classes, replicas = [], []
-    xml = os.path.dirname(mxd)+'\\replica.xml'
-
-    for r in replica_objs:
+        replica_list(List OR Text):
+         List containing fully qualified replica name(s) of interest. Example: 'SDE.ReplicaName'. Use value 'ALL' to
+         create mxd files for all replicas in geodatabase"""
+    arcpy.env.overwriteOutput = True
+    replica_objects = arcpy.da.ListReplicas(gdb)
+    replicas = []
+    # Convert replica objects to list of replica names.
+    for r in replica_objects:
         replicas.append(r.name)
+
+    # If ALL keyword used created MXDs for all replicas in geodatabase.
+    if replica_list == 'ALL':
+        for r in replicas:
+            convert2mxd(r, replicas, mxd_dir, gdb)
+    else:
+        for replica in replica_list:
+            if replica in replicas:
+                convert2mxd(replica, replicas, mxd_dir, gdb)
+
+
+def convert2mxd(replica, replicas, mxd_dir, gdb):
+
+    arcpy.env.overwriteOutput = True
+    feature_classes = []
+    mxd = '{0}\\{1}.mxd'.format(mxd_dir, replica.split('.')[-1])
+    # Make copy of the template MXD and give replica's name
+    install_dir = arcpy.GetInstallInfo()['InstallDir']
+    shutil.copyfile(
+        '{0}MapTemplates\\Standard Page Sizes\\ISO (A) Page Sizes\\ISO A0 Portrait.mxd'.format(install_dir),
+        mxd)
+
+    # If the replica can be found in the geodatabase, export it's schema as xml and parse dataset names.
     if replica in replicas:
+        xml = os.path.dirname(mxd_dir) + '\\{0}.xml'.format(replica)
         arcpy.ExportReplicaSchema_management(gdb, xml, replica)
         tree = ET.parse(xml)
         for elem in tree.iter():
             if elem.tag == "DatasetName":
                 feature_classes.append(elem.text)
+        mxdo = arcpy.mapping.MapDocument(mxd)
+        df = mxdo.activeDataFrame
+
+        # Add datasets to the copied MXD file.
+        for fc in feature_classes:
+            desc = arcpy.Describe("{0}\\{1}".format(gdb, fc))
+            if desc.dataType == u'Table':
+                tbl = arcpy.mapping.TableView("{0}\\{1}".format(gdb, fc))
+                arcpy.mapping.AddTableView(df, tbl)
+            elif desc.dataType == u'FeatureClass':
+                layer = arcpy.mapping.Layer("{0}\\{1}".format(gdb, fc))
+                arcpy.mapping.AddLayer(df, layer, "TOP")
+            else:
+                pass
+        mxdo.save()
+        os.remove(xml)
     else:
         print "Replica '{0}' not found in {1}".format(replica, gdb)
-
-    mxdo = arcpy.mapping.MapDocument(mxd)
-    df = mxdo.activeDataFrame
-    for fc in feature_classes:
-        desc = arcpy.Describe("{0}\\{1}".format(gdb, fc))
-        if desc.dataType == u'Table':
-            tbl = arcpy.mapping.TableView("{0}\\{1}".format(gdb, fc))
-            arcpy.mapping.AddTableView(df, tbl)
-        elif desc.dataType == u'FeatureClass':
-            layer = arcpy.mapping.Layer("{0}\\{1}".format(gdb, fc))
-            arcpy.mapping.AddLayer(df, layer, "TOP")
-        else:
-            pass
-    mxdo.save()
-    os.remove(xml)
-
-# replica2mxd()
