@@ -19,8 +19,8 @@ def replica2mxd(gdb, mxd_dir, replica_list):
          Full path to an existing directory where the replica MXD files will be created.
 
         replica_list(List OR Text):
-         List containing fully qualified replica name(s) of interest. Example: 'SDE.ReplicaName'. Use value 'ALL' to
-         create mxd files for all replicas in geodatabase"""
+         List containing fully qualified replica name(s) of interest. Example: 'SDE.ReplicaName'.
+         Use the value 'ALL' to create MXD files for all replicas in geodatabase."""
     arcpy.env.overwriteOutput = True
     replica_objects = arcpy.da.ListReplicas(gdb)
     replicas = []
