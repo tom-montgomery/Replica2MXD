@@ -1,4 +1,4 @@
-"""Creates MXD files from enterprise geodatabase replicas containing all feature classes and files. Use when re-creating
+"""Creates MXD files from enterprise geodatabase replicas containing all feature classes and tables. Use when re-creating
 replicas or for quickly checking replica contents."""
 import os
 import xml.etree.ElementTree as ET
