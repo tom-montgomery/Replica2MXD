@@ -1,7 +1,7 @@
 # Replica2MXD
-Adds all feature classes contained in a specific enterprise geodatabase replica to an already created mxd file.
+Creates MXD files from enterprise geodatabase replicas containing all feature classes and tables. Use when re-creating
+replicas or for quickly checking replica contents.
 
 After having created numerous MXDs to define which feature classes are included in a replica, I decided to automate it.
-I could not figure out how to auto create MXD files using arcobjects to really automate the whole process, so for now
-this module only supports adding replica feature classes to a single mxd at a time. Hopefully in the future it will be
-possible to simply point to a SDE and create MXD files of all the replicas.
+Use a list of fully qualified replica names for the replica_list variable or use the keyword "ALL" to create MXD files for 
+all replicas in the enterprise geodatabase of interest.
