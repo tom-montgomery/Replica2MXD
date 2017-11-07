@@ -29,14 +29,16 @@ def replica2mxd(gdb, mxd_dir, replica_list):
         replicas.append(r.name)
 
     # If ALL keyword used created MXDs for all replicas in geodatabase.
-    if replica_list == 'ALL':
-        for r in replicas:
-            convert2mxd(r, replicas, mxd_dir, gdb)
+    if len(replica_objects) != 0:
+        if replica_list == 'ALL':
+            for r in replicas:
+                convert2mxd(r, replicas, mxd_dir, gdb)
+        else:
+            for replica in replica_list:
+                if replica in replicas:
+                    convert2mxd(replica, replicas, mxd_dir, gdb)
     else:
-        for replica in replica_list:
-            if replica in replicas:
-                convert2mxd(replica, replicas, mxd_dir, gdb)
-
+        print "No replicas found in database"
 
 def convert2mxd(replica, replicas, mxd_dir, gdb):
     """Copies template MXD and renames to replica name then converts replica in replica list to xml and parses datasets.
