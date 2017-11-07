@@ -16,8 +16,8 @@ Use in python by importing:
 Call function by passing the geodatabase connection, MXD output folder, and replica name(s) as parameters:
 Use 'ALL' parameter to create MXD files for all replicas in geodatabase:
   
-```r2m.replica2mxd('Database Connections\\example-db-1@gisDatabase@sde.sde', 'C:\\Replicas\\MXDs', 'ALL')```
+```r2m.replica2mxd('Database Connections\\example-gis-server@gisDatabase@sde.sde', 'C:\\Replicas\\MXDs', 'ALL')```
 
 Or use a list of replica names to create MXD files for only those replicas. Must include replica owner in replica names:
   
-```r2m.replica2mxd('Database Connections\\example-db-1@gisDatabase@sde.sde', 'C:\\Replicas\\MXDs', ['SDE.Replica1', 'SDE.Replica2', ...])```
+```r2m.replica2mxd('Database Connections\\example-gis-server@gisDatabase@sde.sde', 'C:\\Replicas\\MXDs', ['SDE.Replica1', 'SDE.Replica2', ...])```
