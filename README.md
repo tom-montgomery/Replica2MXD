@@ -13,8 +13,8 @@ Use in python by importing:
 
 ```import replica2mxd as r2m```
 
-Call function by passing the geodatabase connection, MXD output folder, and replica name(s) as parameters:
-Use 'ALL' parameter to create MXD files for all replicas in geodatabase:
+Call function and use by passing the geodatabase connection, MXD output folder, and replica name(s) as parameters:
+Use 'ALL' keyword for replicas parameter to create MXD files for all replicas in geodatabase:
   
 ```r2m.replica2mxd('Database Connections\\example-gis-server@gisDatabase@sde.sde', 'C:\\Replicas\\MXDs', 'ALL')```
 
