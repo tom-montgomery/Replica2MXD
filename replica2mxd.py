@@ -29,16 +29,22 @@ def replica2mxd(gdb, mxd_dir, replica_list):
         replicas.append(r.name)
 
     # If ALL keyword used created MXDs for all replicas in geodatabase.
-    if len(replica_objects) != 0:
         if replica_list == 'ALL':
             for r in replicas:
-                convert2mxd(r, replicas, mxd_dir, gdb)
+                try:
+                    convert2mxd(r, replicas, mxd_dir, gdb)
+                except Exception as e:
+                    print e
+                    pass
         else:
             for replica in replica_list:
                 if replica in replicas:
-                    convert2mxd(replica, replicas, mxd_dir, gdb)
-    else:
-        print "No replicas found in database"
+                    try:
+                        convert2mxd(replica, replicas, mxd_dir, gdb)
+                    except Exception as e:
+                        print e
+                        pass
+
 
 def convert2mxd(replica, replicas, mxd_dir, gdb):
     """Copies template MXD and renames to replica name then converts replica in replica list to xml and parses datasets.
@@ -60,7 +66,7 @@ def convert2mxd(replica, replicas, mxd_dir, gdb):
     mxd = '{0}\\{1}.mxd'.format(mxd_dir, replica.split('.')[-1])
     # Make copy of the template MXD and give replica's name
     install_dir = arcpy.GetInstallInfo()['InstallDir']
-    shutil.copyfile(
+    shutil.copy(
         '{0}MapTemplates\\Standard Page Sizes\\ISO (A) Page Sizes\\ISO A0 Portrait.mxd'.format(install_dir),
         mxd)
 
