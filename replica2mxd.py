@@ -30,20 +30,12 @@ def replica2mxd(gdb, mxd_dir, replica_list):
 
     # If ALL keyword used created MXDs for all replicas in geodatabase.
         if replica_list == 'ALL':
-            for r in replicas:
-                try:
-                    convert2mxd(r, replicas, mxd_dir, gdb)
-                except Exception as e:
-                    print e
-                    pass
+            for replica in replicas:
+                convert2mxd(replica, replicas, mxd_dir, gdb)
         else:
             for replica in replica_list:
                 if replica in replicas:
-                    try:
-                        convert2mxd(replica, replicas, mxd_dir, gdb)
-                    except Exception as e:
-                        print e
-                        pass
+                    convert2mxd(replica, replicas, mxd_dir, gdb)
 
 
 def convert2mxd(replica, replicas, mxd_dir, gdb):
@@ -62,10 +54,12 @@ def convert2mxd(replica, replicas, mxd_dir, gdb):
         gdb(Text):
          Database connection file which contains the replicas of interest."""
     arcpy.env.overwriteOutput = True
+
     feature_classes = []
     mxd = '{0}\\{1}.mxd'.format(mxd_dir, replica.split('.')[-1])
-    # Make copy of the template MXD and give replica's name
     install_dir = arcpy.GetInstallInfo()['InstallDir']
+
+    # Make copy of the template MXD and give replica's name
     shutil.copy(
         '{0}MapTemplates\\Standard Page Sizes\\ISO (A) Page Sizes\\ISO A0 Portrait.mxd'.format(install_dir),
         mxd)
@@ -75,11 +69,12 @@ def convert2mxd(replica, replicas, mxd_dir, gdb):
         xml = os.path.dirname(mxd_dir) + '\\{0}.xml'.format(replica)
         arcpy.ExportReplicaSchema_management(gdb, xml, replica)
         tree = ET.parse(xml)
+
         for elem in tree.iter():
             if elem.tag == "DatasetName":
                 feature_classes.append(elem.text)
-        mxdo = arcpy.mapping.MapDocument(mxd)
-        df = mxdo.activeDataFrame
+        mxdobj = arcpy.mapping.MapDocument(mxd)
+        df = mxdobj.activeDataFrame
 
         # Add datasets to the copied MXD file.
         for fc in feature_classes:
@@ -92,7 +87,9 @@ def convert2mxd(replica, replicas, mxd_dir, gdb):
                 arcpy.mapping.AddLayer(df, layer, "TOP")
             else:
                 pass
-        mxdo.save()
+
+        mxdobj.save()
         os.remove(xml)
+
     else:
         print "Replica '{0}' not found in {1}".format(replica, gdb)
