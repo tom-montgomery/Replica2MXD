@@ -1,5 +1,5 @@
 # Replica2MXD
-Creates MXD files from enterprise geodatabase replicas containing all feature classes and tables. Use when re-creating
+Creates MXD files from enterprise geodatabase (version 10.x) replicas containing all feature classes and tables. Use when re-creating
 replicas or for quickly checking replica contents.
 
 After having created numerous MXDs to define which feature classes are included in a replica, I decided to automate it.
