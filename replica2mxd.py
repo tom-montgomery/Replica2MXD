@@ -1,5 +1,5 @@
 """Creates MXD files from enterprise geodatabase replicas containing all feature classes and tables. Use when re-creating
-replicas or for quickly checking replica contents."""
+replicas or for quickly checking replica contents. Only supports versions 10.x"""
 import os
 import xml.etree.ElementTree as ET
 import shutil
@@ -93,3 +93,4 @@ def convert2mxd(replica, replicas, mxd_dir, gdb):
 
     else:
         print "Replica '{0}' not found in {1}".format(replica, gdb)
+
